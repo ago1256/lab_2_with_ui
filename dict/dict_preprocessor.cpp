@@ -1,11 +1,12 @@
 #include "../radix_tree/radix_tree.h"
+#include "tests/test.h"
 #include <iostream>
 #include <string>
 
 
 int main(int argc, char* argv[]) {
 
-    std::string text_file = argv[1];
+    std::string text_file = "../data/dict.txt";
     std::string binary_file = "../data/dict.bin";
     
     Radix_tree dictionary;
@@ -17,8 +18,7 @@ int main(int argc, char* argv[]) {
         std::cerr << "ERROR BUILDING DICT" << text_file << std::endl;
         return 1;
     }
-    
+    run_tests();
     std::cout << "Word count: " << dictionary.size() << std::endl;
-    
     return 0;
 }

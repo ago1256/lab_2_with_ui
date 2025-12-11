@@ -15,7 +15,6 @@ private:
         Node(const std::string& k, bool end = false);
         ~Node();
         
-        // Методы для сериализации
         void serialize(std::ofstream& out) const;
         static Node* deserialize(std::ifstream& in);
     };
@@ -23,7 +22,6 @@ private:
     Node* root;
     int words_count;
 
-    // Приватные методы
     int prefix(const std::string& str1, const std::string& str2) const;
     Node* find(Node* t, const std::string& x, int n) const;
     void split(Node* t, int len);
@@ -42,11 +40,8 @@ public:
     bool empty() const;
     void clear();
     
-    // Новые методы для сериализации/десериализации
     bool serialize_to_binary(const std::string& filename) const;
     bool deserialize_from_binary(const std::string& filename);
     
-    // Метод для построения из текстового файла с возможностью сохранения в бинарный
-    bool build_from_text_file(const std::string& text_file, 
-                             const std::string& binary_file = "");
+    bool build_from_text_file(const std::string& text_file, const std::string& binary_file = "");
 };

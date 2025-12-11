@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstring>
+#include <cctype>
 
 Radix_tree::Node::Node(const std::string& k, bool end) 
     : key(k), is_end(end), link(nullptr), next(nullptr) {}
@@ -45,8 +46,7 @@ Radix_tree::Node* Radix_tree::Node::deserialize(std::ifstream& in) {
         delete[] key_buf;
         return nullptr;
     }
-    key_buf[key_len] = '\0';
-    std::string key(key_buf);
+    std::string key(key_buf, key_len);  
     delete[] key_buf;
     
     bool is_end;
@@ -133,10 +133,14 @@ Radix_tree::~Radix_tree() {
 
 bool Radix_tree::contains(const std::string& word) const {
     if (word.empty()) return false;
-    return find(root, word, -1) != nullptr;
+    std::string word_without_register = word;
+    word_without_register[0] = std::tolower(word_without_register[0]);
+    return find(root, word_without_register, -1) != nullptr;
 }
 
-void Radix_tree::insert(const std::string& word) {
+void Radix_tree::insert(const std::string& word_with_reg) {
+    std::string word = word_with_reg;
+    word[0] = std::tolower(word[0]);
     if (word.empty() || contains(word)) return;
     
     auto insert_recursive = [this](Node* t, const std::string& x, auto&& self) -> Node* {

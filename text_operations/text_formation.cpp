@@ -66,7 +66,6 @@ std::vector<std::string> Text_formation::split_to_lines(const std::string& text)
     std::vector<std::string> lines;
     
     if (text.empty() || page_width == 0 || page_width < 10) {
-        // Минимальная ширина
         lines.push_back(text);
         return lines;
     }
@@ -83,22 +82,17 @@ std::vector<std::string> Text_formation::split_to_lines(const std::string& text)
     for (size_t i = 1; i < words.size(); ++i) {
         const std::string& word = words[i];
         
-        // Пробел + слово
         size_t new_length = current_line.length() + 1 + word.length();
         
         if (new_length <= page_width) {
-            // Вмещается - добавляем с пробелом
             current_line += " " + word;
         } else {
-            // Не вмещается - сохраняем текущую строку
             lines.push_back(current_line);
             
-            // Начинаем новую строку с текущего слова
             current_line = word;
         }
     }
-    
-    // Добавляем последнюю строку
+
     if (!current_line.empty()) {
         lines.push_back(current_line);
     }

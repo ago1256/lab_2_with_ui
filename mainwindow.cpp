@@ -17,19 +17,23 @@
 #include <QListWidgetItem>
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), current_page(0), total_pages(0), current_search_index(0)
+    : QMainWindow(parent), 
+      current_page(0), 
+      total_pages(0), 
+      current_search_index(0),
+      page_display(nullptr),
+      open_file_button(nullptr),
+      splitter(nullptr)
 {
     setup_ui();
     setup_connections();
     
-    // Контекстное меню
     context_menu = new QMenu(this);
     add_word_action = new QAction("Добавить слово в словарь", this);
     context_menu->addAction(add_word_action);
     
     connect(add_word_action, &QAction::triggered, this, &MainWindow::on_add_word_from_context_menu);
-    
-    // ВАЖНО: Устанавливаем контекстное меню для QTextEdit
+
     page_display->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(page_display, &QTextEdit::customContextMenuRequested, this, [this](const QPoint &pos) {
         QTextCursor cursor = page_display->cursorForPosition(pos);
@@ -43,13 +47,6 @@ MainWindow::MainWindow(QWidget *parent)
         }
     });
     
-
-  /*  if (!load_dictionary_from_file("../data/dict.txt")) {
-        status_label->setText("Ошибка загрузки словаря. Проверьте файл data/dict.txt");
-    } else {
-        status_label->setText("Готов к работе - выберите файл для проверки орфографии");
-    }*/
-    
     qDebug() << "Количество слов в словаре:" << global_dict.size();
 }
 
@@ -59,15 +56,12 @@ MainWindow::~MainWindow()
 
 void MainWindow::setup_ui()
 {
-    // Создаем главный сплиттер
     splitter = new QSplitter(Qt::Horizontal, this);
     setCentralWidget(splitter);
     
-    // ЛЕВАЯ ЧАСТЬ: основной текст
     QWidget *left_widget = new QWidget(this);
     QVBoxLayout *main_layout = new QVBoxLayout(left_widget);
     
-    // Панель управления
     QHBoxLayout *control_layout = new QHBoxLayout();
     
     open_file_button = new QPushButton("Выбрать файл", this);
@@ -83,7 +77,6 @@ void MainWindow::setup_ui()
     control_layout->addWidget(add_word_button);
     control_layout->addStretch();
     
-    // Панель настроек
     QHBoxLayout *settings_layout = new QHBoxLayout();
     
     QLabel *width_label = new QLabel("Ширина страницы:", this);
@@ -107,16 +100,14 @@ void MainWindow::setup_ui()
     settings_layout->addWidget(lines_per_page_spin);
     settings_layout->addStretch();
     
-    // Метка имени файла
     file_name_label = new QLabel("Файл не выбран", this);
     file_name_label->setStyleSheet("font-weight: bold; color: blue; padding: 2px;");
     
-    // Панель поиска
     QHBoxLayout *search_layout = new QHBoxLayout();
     
     QLabel *search_label = new QLabel("Поиск:", this);
     search_input = new QLineEdit(this);
-    search_input->setPlaceholderText("Введите слово для поиска...");
+    search_input->setPlaceholderText("Введите слово для поиска");
     search_input->setMinimumWidth(200);
     search_button = new QPushButton("Найти", this);
     search_button->setFixedWidth(80);
@@ -134,7 +125,6 @@ void MainWindow::setup_ui()
     search_layout->addWidget(next_search_button);
     search_layout->addStretch();
     
-    // Панель навигации по страницам
     QHBoxLayout *page_nav_layout = new QHBoxLayout();
     
     prev_page_button = new QPushButton("← Назад", this);
@@ -149,20 +139,17 @@ void MainWindow::setup_ui()
     page_nav_layout->addWidget(next_page_button);
     page_nav_layout->addStretch();
     
-    // Основное поле для отображения текста
     page_display = new QTextEdit(this);
     page_display->setReadOnly(true);
-    page_display->setPlaceholderText("Загрузите файл и нажмите 'Форматировать текст' для отображения...");
+    page_display->setPlaceholderText("Загрузите файл");
     
     QFont fixed_font("Courier New", 10);
     page_display->setFont(fixed_font);
     
-    // Статусная строка
     status_label = new QLabel(this);
     status_label->setStyleSheet("background-color: #f0f0f0; padding: 5px;");
     status_label->setFrameShape(QFrame::Box);
     
-    // Информация о словаре
     dict_info = new QLabel(
         QString("Словарь: data/dict.txt | Загружено слов: %1 | ")
         .arg(global_dict.size()), 
@@ -170,7 +157,6 @@ void MainWindow::setup_ui()
     );
     dict_info->setStyleSheet("color: green; font-size: 10px; padding: 2px;");
     
-    // Добавляем все в левую часть
     main_layout->addLayout(control_layout);
     main_layout->addLayout(settings_layout);
     main_layout->addWidget(file_name_label);
@@ -180,7 +166,6 @@ void MainWindow::setup_ui()
     main_layout->addWidget(status_label);
     main_layout->addWidget(dict_info);
     
-    // ПРАВАЯ ЧАСТЬ: результаты поиска
     QWidget *right_widget = new QWidget(this);
     QVBoxLayout *right_layout = new QVBoxLayout(right_widget);
     
@@ -194,13 +179,12 @@ void MainWindow::setup_ui()
     right_layout->addWidget(results_label);
     right_layout->addWidget(search_results_list, 1);
     
-    // Добавляем виджеты в сплиттер
     splitter->addWidget(left_widget);
     splitter->addWidget(right_widget);
-    splitter->setStretchFactor(0, 3); // Текст занимает 3/4
-    splitter->setStretchFactor(1, 1); // Результаты 1/4
+    splitter->setStretchFactor(0, 3); 
+    splitter->setStretchFactor(1, 1);
     
-    setWindowTitle("Проверка орфографии с Radix Tree");
+    setWindowTitle("Spell checker with Radix tree");
     resize(1200, 700);
 }
 
@@ -212,7 +196,6 @@ void MainWindow::setup_connections()
     connect(next_page_button, &QPushButton::clicked, this, &MainWindow::on_next_page_clicked);
     connect(prev_page_button, &QPushButton::clicked, this, &MainWindow::on_prev_page_clicked);
     
-    // Поиск
     connect(search_button, &QPushButton::clicked, this, &MainWindow::on_search_word_clicked);
     connect(next_search_button, &QPushButton::clicked, this, &MainWindow::on_next_search_result_clicked);
     connect(prev_search_button, &QPushButton::clicked, this, &MainWindow::on_prev_search_result_clicked);
@@ -240,7 +223,6 @@ void MainWindow::on_open_file_clicked()
             file_name_label->setText(QString("Файл: %1").arg(file_info.fileName()));
             status_label->setText(QString("Файл загружен: %1 | Слов в словаре: %2").arg(file_info.fileName()).arg(global_dict.size()));
             
-            // Очищаем все
             search_results.clear();
             all_search_results.clear();
             search_results_list->clear();
@@ -278,7 +260,6 @@ void MainWindow::on_format_text_clicked()
     total_pages = pages.size();
     current_page = 0;
     
-    // Сбрасываем поиск
     search_results.clear();
     all_search_results.clear();
     search_results_list->clear();
@@ -299,18 +280,11 @@ void MainWindow::on_add_word_clicked()
                                         QLineEdit::Normal, "", &ok);
     
     if (ok && !word.isEmpty()) {
-        // 1. Добавляем в дерево
         global_dict.insert(word.toStdString());
         
-        // 2. Сохраняем в текстовый файл
         QString dict_txt_path = "../data/dict.txt";
-        save_dictionary_to_file(dict_txt_path.toStdString());
-        
-        // 3. Сохраняем в бинарный файл (НОВОЕ!)
-        QString dict_bin_path = "../data/dict.bin";
-        global_dict.serialize_to_binary(dict_bin_path.toStdString());
-        
-        // 4. Обновляем интерфейс
+        save_dictionary_full();
+  
         QMessageBox::information(this, "Успех", QString("Слово '%1' добавлено в словарь").arg(word));
         highlight_all();
         dict_info->setText(QString("Словарь: data/dict.txt | Загружено слов: %1").arg(global_dict.size()));
@@ -319,7 +293,6 @@ void MainWindow::on_add_word_clicked()
 
 void MainWindow::on_add_word_from_context_menu()
 {
-    // Получаем слово из данных действия или из сохраненной переменной
     QString word_to_add;
     if (add_word_action->data().isValid()) {
         word_to_add = add_word_action->data().toString();
@@ -331,12 +304,10 @@ void MainWindow::on_add_word_from_context_menu()
         global_dict.insert(word_to_add.toStdString());
         
         QString dict_path = "../data/dict.txt";
-        if (save_dictionary_to_file(dict_path.toStdString())) {
-            // Обновляем интерфейс
-            dict_info->setText(QString("Словарь: data/dict.txt | Загружено слов: %1 | ").arg(global_dict.size()) +
-                              "Чтобы добавить слово: правый клик на подчеркнутом слове");
+        if (save_dictionary_full()) {
+
+            dict_info->setText(QString("Словарь: data/dict.txt | Загружено слов: %1 | ").arg(global_dict.size()));
             
-            // Обновляем подсветку
             if (!pages.isEmpty()) {
                 highlight_all();
             } else if (!original_text.isEmpty()) {
@@ -346,7 +317,6 @@ void MainWindow::on_add_word_from_context_menu()
             
             status_label->setText(QString("Слово '%1' добавлено в словарь").arg(word_to_add));
             
-            // Показываем уведомление
             QMessageBox::information(this, "Успех", 
                 QString("Слово '%1' добавлено в словарь.\nВсего слов в словаре: %2")
                 .arg(word_to_add)
@@ -356,7 +326,6 @@ void MainWindow::on_add_word_from_context_menu()
             status_label->setText("Ошибка сохранения словаря");
         }
         
-        // Очищаем данные
         add_word_action->setData(QVariant());
         selected_word.clear();
     }
@@ -367,7 +336,7 @@ void MainWindow::on_next_page_clicked()
     if (current_page < total_pages - 1) {
         current_page++;
         update_page_view();
-        highlight_all();  // Важно: обновляем подсветку
+        highlight_all();  
     }
 }
 
@@ -376,9 +345,10 @@ void MainWindow::on_prev_page_clicked()
     if (current_page > 0) {
         current_page--;
         update_page_view();
-        highlight_all();  // Важно: обновляем подсветку
+        highlight_all(); 
     }
 }
+
 void MainWindow::on_search_word_clicked()
 {
     QString search_word = search_input->text().trimmed();
@@ -406,7 +376,6 @@ void MainWindow::on_next_search_result_clicked()
         current_search_index++;
         show_current_search_result();
     } else {
-        // Пробуем перейти на следующую страницу если есть результаты
         int next_page_with_results = -1;
         for (int page = current_page + 1; page < total_pages; ++page) {
             for (const auto& result : all_search_results) {
@@ -441,7 +410,6 @@ void MainWindow::on_prev_search_result_clicked()
         current_search_index--;
         show_current_search_result();
     } else {
-        // Пробуем перейти на предыдущую страницу если есть результаты
         int prev_page_with_results = -1;
         for (int page = current_page - 1; page >= 0; --page) {
             for (const auto& result : all_search_results) {
@@ -465,24 +433,21 @@ void MainWindow::on_prev_search_result_clicked()
     }
 }
 
-void MainWindow::on_search_result_clicked(QListWidgetItem* item)
-{
+void MainWindow::on_search_result_clicked(QListWidgetItem* item) {
     int global_index = search_results_list->row(item);
     if (global_index >= 0 && global_index < all_search_results.size()) {
-        const SearchResult& result = all_search_results[global_index];
+        const PageSearchResult& result = all_search_results[global_index];
         
-        // Переключаемся на нужную страницу
         if (result.page != current_page) {
             current_page = result.page;
             update_page_view();
         }
         
-        // Находим индекс на текущей странице
         current_search_index = -1;
         for (size_t i = 0; i < search_results.size(); ++i) {
             int pos_in_page = calculate_position_in_page_text(result);
             if (pos_in_page == search_results[i].position) {
-                current_search_index = i;
+                current_search_index = static_cast<int>(i);
                 break;
             }
         }
@@ -493,8 +458,7 @@ void MainWindow::on_search_result_clicked(QListWidgetItem* item)
     }
 }
 
-void MainWindow::perform_global_search(const QString& word)
-{
+void MainWindow::perform_global_search(const QString& word) {
     all_search_results.clear();
     search_results_list->clear();
     
@@ -507,48 +471,62 @@ void MainWindow::perform_global_search(const QString& word)
         status_label->setText("Сначала отформатируйте текст");
         return;
     }
-    
-    qDebug() << "Глобальный поиск слова:" << word;
-    
-    // Ищем во всех страницах
+
     for (int page_idx = 0; page_idx < pages.size(); ++page_idx) {
         QString page_text = pages[page_idx];
         QStringList lines = page_text.split('\n');
         
         for (int line_idx = 0; line_idx < lines.size(); ++line_idx) {
             QString line = lines[line_idx];
-            int pos = 0;
             
-            while ((pos = line.indexOf(word, pos, Qt::CaseInsensitive)) != -1) {
-                SearchResult result;
-                result.page = page_idx;
-                result.line = line_idx;
-                result.position = pos;
-                result.length = word.length();
-                result.word = line.mid(pos, word.length());
-                result.absolute_position = calculate_absolute_position(page_idx, line_idx, pos);
-                
-                all_search_results.push_back(result);
-                
-                // Добавляем в список
-                QString item_text = QString("Стр. %1, строка %2: \"%3\"")
-                    .arg(page_idx + 1)
-                    .arg(line_idx + 1)
-                    .arg(result.word);
-                search_results_list->addItem(item_text);
-                
-                pos += word.length();
+            std::vector<int> positions;
+            std::string line_std = line.toStdString();
+            std::string word_std = word.toStdString();
+            positions = word_find_BMH(word_std, line_std);
+            
+            for (int pos : positions) {
+                if (pos >= 0 && pos + word.length() <= line.length()) {
+                    QString found_word = line.mid(pos, word.length());
+                    
+                bool is_whole_word = true;
+                    
+                    if (pos > 0) {
+                        QChar prev_char = line[pos - 1];
+                        is_whole_word = prev_char.isSpace() || prev_char.isPunct();
+                    }
+                    
+                    if (pos + word.length() < line.length()) {
+                        QChar next_char = line[pos + word.length()];
+                        is_whole_word = is_whole_word && (next_char.isSpace() || next_char.isPunct());
+                    }
+                    
+                    if (!is_whole_word) {
+                        continue; 
+                    }
+                    
+                    PageSearchResult result;
+                    result.page = page_idx;
+                    result.line = line_idx;
+                    result.position = pos;
+                    result.length = word.length();
+                    result.word = found_word;
+                    result.absolute_position = calculate_absolute_position(page_idx, line_idx, pos);
+                    
+                    all_search_results.push_back(result);
+                    
+                    QString item_text = QString("Стр. %1, строка %2: \"%3\"")
+                        .arg(page_idx + 1)
+                        .arg(line_idx + 1)
+                        .arg(result.word);
+                    search_results_list->addItem(item_text);
+                }
             }
         }
     }
     
-    qDebug() << "Всего найдено:" << all_search_results.size();
-    
-    // Обновляем отображение на текущей странице
     update_search_results_on_current_page();
     
     if (!all_search_results.empty()) {
-        // Автоматически показываем первый результат на текущей странице
         if (!search_results.empty()) {
             current_search_index = 0;
             show_current_search_result();
@@ -557,57 +535,64 @@ void MainWindow::perform_global_search(const QString& word)
         status_label->setText(QString("Найдено: %1 совпадений во всем документе").arg(all_search_results.size()));
     } else {
         current_search_index = -1;
-        highlight_all();  // Сбрасываем подсветку поиска
+        highlight_all(); 
         status_label->setText(QString("Слово '%1' не найдено").arg(word));
     }
 }
 
-int MainWindow::calculate_absolute_position(int page, int line, int pos_in_line) const
-{
+int MainWindow::calculate_absolute_position(int page, int line, int pos_in_line) const {
     if (pages.isEmpty()) return 0;
     
     int absolute_pos = 0;
     
-    // Суммируем предыдущие страницы
-    for (int i = 0; i < page; ++i) {
-        absolute_pos += pages[i].length() + 1;
+    for (int i = 0; i < page && i < pages.size(); ++i) {
+        absolute_pos += pages[i].length() + 1; 
     }
-    
-    // Добавляем текущую страницу
+
     QString page_text = pages[page];
     QStringList lines = page_text.split('\n');
-    
-    for (int i = 0; i < line; ++i) {
-        absolute_pos += lines[i].length() + 1;
+
+    if (line >= lines.size() || line < 0) {
+        return absolute_pos;
     }
     
-    absolute_pos += pos_in_line;
+    for (int i = 0; i < line && i < lines.size(); ++i) {
+        absolute_pos += lines[i].length() + 1; 
+    }
+    
+    if (pos_in_line >= 0 && pos_in_line <= lines[line].length()) {
+        absolute_pos += pos_in_line;
+    }
     
     return absolute_pos;
 }
 
-int MainWindow::calculate_position_in_page_text(const SearchResult& result) const
-{
+
+int MainWindow::calculate_position_in_page_text(const PageSearchResult& result) const {
     if (pages.isEmpty() || result.page != current_page) return 0;
     
     QString page_text = pages[current_page];
     QStringList lines = page_text.split('\n');
     
+    if (result.line >= lines.size() || result.line < 0) {
+        return 0;
+    }
+    
     int position = 0;
-    for (int i = 0; i < result.line; ++i) {
+    for (int i = 0; i < result.line && i < lines.size(); ++i) {
         position += lines[i].length() + 1;
     }
     
-    position += result.position;
+    if (result.position >= 0 && result.position <= lines[result.line].length()) {
+        position += result.position;
+    }
     
     return position;
 }
 
-void MainWindow::update_search_results_on_current_page()
-{
+void MainWindow::update_search_results_on_current_page() {
     search_results.clear();
     
-    // Фильтруем результаты для текущей страницы
     for (const auto& result : all_search_results) {
         if (result.page == current_page) {
             SimpleSearchResult simple_result;
@@ -617,13 +602,14 @@ void MainWindow::update_search_results_on_current_page()
         }
     }
     
-    // Сбрасываем индекс если нет результатов на странице
     if (search_results.empty()) {
         current_search_index = -1;
-    } else if (current_search_index >= search_results.size()) {
+    } else if (current_search_index >= static_cast<int>(search_results.size())) {
         current_search_index = 0;
     }
 }
+
+
 
 void MainWindow::update_page_view()
 {
@@ -634,21 +620,17 @@ void MainWindow::update_page_view()
     }
     
     if (current_page >= 0 && current_page < pages.size()) {
-        // Устанавливаем новый текст
         page_display->setPlainText(pages[current_page]);
         page_label->setText(QString("Страница %1 из %2").arg(current_page + 1).arg(total_pages));
         
-        // ОБЯЗАТЕЛЬНО: Вызываем подсветку
         highlight_all();
         
-        // Обновляем результаты поиска для текущей страницы
         update_search_results_on_current_page();
         
         if (!search_input->text().trimmed().isEmpty()) {
             if (!search_results.empty()) {
                 status_label->setText(QString("Страница %1: %2 совпадений").arg(current_page + 1).arg(search_results.size()));
                 
-                // Автоматически показываем первый результат на странице
                 if (current_search_index >= search_results.size()) {
                     current_search_index = 0;
                 }
@@ -672,7 +654,6 @@ void MainWindow::highlight_all()
     
     QTextCursor cursor(doc);
     
-    // 1. Ошибки орфографии
     QRegularExpression word_regex("\\b[a-zA-Z0-9]+(?:['\\-:][a-zA-Z0-9]+)*\\b");
     QRegularExpressionMatchIterator it = word_regex.globalMatch(current_text);
     
@@ -691,9 +672,8 @@ void MainWindow::highlight_all()
         }
     }
     
-    // 2. Результаты поиска (если есть)
     if (!search_results.empty() && !search_input->text().trimmed().isEmpty()) {
-        // Желтый для всех результатов
+
         QTextCharFormat search_format;
         search_format.setBackground(Qt::yellow);
         
@@ -735,29 +715,46 @@ void MainWindow::highlight_all()
     }
 }
 
-void MainWindow::show_current_search_result()
-{
+void MainWindow::show_current_search_result() {
     if (search_results.empty() || current_search_index < 0 || 
-        current_search_index >= search_results.size()) {
+        current_search_index >= static_cast<int>(search_results.size())) {
+        qDebug() << "show_current_search_result: нет результатов";
         return;
     }
     
     const auto& result = search_results[current_search_index];
+    QString page_text = pages[current_page];
+    
+    qDebug() << "Показываем результат #" << current_search_index 
+             << "позиция:" << result.position
+             << "длина:" << result.length;
+    
+    if (result.position < 0 || result.position + result.length > page_text.length()) {
+        qDebug() << "Ошибка: позиция выходит за границы текста!";
+        status_label->setText("Ошибка: позиция выходит за границы текста");
+        return;
+    }
+    
+    int start = std::max(0, result.position - 10);
+    int end = page_text.length()> result.position + result.length + 10 ? result.position + result.length + 10: page_text.length();
+    QString context = page_text.mid(start, end - start);
+    qDebug() << "Контекст: ..." << context << "...";
     
     QTextCursor cursor(page_display->document());
     cursor.setPosition(result.position);
     page_display->setTextCursor(cursor);
     page_display->ensureCursorVisible();
     
-
     highlight_all();
-        int global_index = -1;
+    
+
+    int global_index = -1;
     for (size_t i = 0; i < all_search_results.size(); ++i) {
-        const SearchResult& global_result = all_search_results[i];
+        const PageSearchResult& global_result = all_search_results[i];
         if (global_result.page == current_page) {
             int pos_in_page = calculate_position_in_page_text(global_result);
             if (pos_in_page == result.position) {
-                global_index = i;
+                global_index = static_cast<int>(i);
                 break;
             }
         }
@@ -768,10 +765,11 @@ void MainWindow::show_current_search_result()
         search_results_list->scrollToItem(search_results_list->item(global_index));
     }
     
-    status_label->setText(QString("Результат %1 из %2 на странице %3")
+    status_label->setText(QString("Результат %1 из %2 на странице %3 (поз.%4)")
                          .arg(current_search_index + 1)
                          .arg(search_results.size())
-                         .arg(current_page + 1));
+                         .arg(current_page + 1)
+                         .arg(result.position));
 }
 
 QString MainWindow::extract_word_from_position(int position) const
@@ -842,25 +840,4 @@ void MainWindow::contextMenuEvent(QContextMenuEvent *event)
         }
     }
     QMainWindow::contextMenuEvent(event);
-}
-
-int MainWindow::find_global_index_for_current_result() const
-{
-    if (current_search_index < 0 || current_search_index >= search_results.size()) {
-        return -1;
-    }
-    
-    const auto& current_result = search_results[current_search_index];
-    
-    for (size_t i = 0; i < all_search_results.size(); ++i) {
-        const SearchResult& global_result = all_search_results[i];
-        if (global_result.page == current_page) {
-            int pos_in_page = calculate_position_in_page_text(global_result);
-            if (pos_in_page == current_result.position) {
-                return i;
-            }
-        }
-    }
-    
-    return -1;
 }

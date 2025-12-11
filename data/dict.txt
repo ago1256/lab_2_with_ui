@@ -6,6 +6,7 @@ abide
 abolish
 abort
 abound
+about
 abridge
 abscond
 absolve
@@ -31,6 +32,7 @@ acquire
 acquit
 act
 activate
+actively
 adapt
 add
 address
@@ -174,10 +176,6 @@ await
 awake
 award
 away
-Africa
-America
-April
-August
 baby
 back
 bad
@@ -197,6 +195,7 @@ bargain
 bark
 barrel
 base
+based
 bat
 bathe
 battle
@@ -356,7 +355,6 @@ button
 buy
 buzz
 by
-British
 cabbage
 cabin
 cable
@@ -534,6 +532,7 @@ conflict
 confuse
 congratulate
 connect
+connection
 conquer
 conscious
 consider
@@ -768,7 +767,6 @@ dust
 duty
 dwell
 dying
-December
 each
 eager
 eagle
@@ -906,7 +904,6 @@ extra
 extraordinary
 extreme
 eye
-Europe
 fabric
 face
 facility
@@ -1068,8 +1065,6 @@ fur
 furniture
 further
 future
-February
-Friday
 gain
 gallery
 game
@@ -1272,9 +1267,8 @@ hunt
 hurry
 hurt
 husband
-hut
 hypothesis
-I
+i
 ice
 idea
 ideal
@@ -1357,6 +1351,7 @@ intend
 intense
 intent
 interact
+interaction
 interest
 interfere
 interior
@@ -1394,6 +1389,7 @@ jealous
 jeans
 jet
 jewel
+jewelry
 job
 join
 joint
@@ -1410,9 +1406,6 @@ jury
 just
 justice
 justify
-January
-July
-June
 keen
 keep
 kettle
@@ -1509,6 +1502,7 @@ likely
 limb
 limit
 line
+linear
 link
 lion
 lip
@@ -1548,7 +1542,6 @@ lump
 lunch
 lung
 luxury
-Latin
 machine
 mad
 magazine
@@ -1686,8 +1679,6 @@ mutual
 my
 myself
 mystery
-March
-Monday
 nail
 naked
 name
@@ -1748,6 +1739,7 @@ notebook
 nothing
 notice
 notion
+noting
 novel
 now
 nowhere
@@ -1756,7 +1748,6 @@ number
 numerous
 nurse
 nut
-November
 oak
 obey
 object
@@ -1833,8 +1824,6 @@ owe
 own
 owner
 oxygen
-October
-Olympic
 pace
 pack
 package
@@ -2126,6 +2115,7 @@ recipe
 recite
 recognize
 recommend
+recommendations
 record
 recover
 recruit
@@ -2278,6 +2268,7 @@ scheme
 scholar
 school
 science
+scientists
 scissors
 scold
 scope
@@ -2490,6 +2481,7 @@ standard
 star
 stare
 start
+stark
 state
 statement
 station
@@ -2587,11 +2579,6 @@ sword
 symbol
 symptom
 system
-sdkvjahvla4783ivgveifvg
-Saturday
-September
-Spanish
-Sunday
 table
 tackle
 tactic
@@ -2767,9 +2754,6 @@ twist
 two
 type
 typical
-Thursday
-Tuesday
-TV
 ugly
 ultimate
 umbrella
@@ -2883,6 +2867,7 @@ wear
 weather
 web
 wedding
+wednesday
 week
 weekend
 weigh
@@ -2956,7 +2941,6 @@ wrap
 write
 writer
 wrong
-Wednesday
 yard
 year
 yell

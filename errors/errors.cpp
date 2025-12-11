@@ -1,4 +1,3 @@
-// errors.cpp
 #include "errors.h"
 #include <iostream>
 
